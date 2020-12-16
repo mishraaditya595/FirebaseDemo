@@ -1,28 +1,41 @@
 package com.vob.firebasedemo
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.vob.firebasedemo.databinding.ActivitySignInBinding
+import com.vob.firebasedemo.databinding.FragmentSignInBinding
 
-class SignInActivity : AppCompatActivity() {
+class SignInFragment : Fragment() {
 
-    private lateinit var binding: ActivitySignInBinding
+    private lateinit var binding: FragmentSignInBinding
     private val RC_SIGN_IN = 8080
     private lateinit var mAuth: FirebaseAuth
+    private lateinit var navController: NavController
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySignInBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_sign_in, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mAuth = FirebaseAuth.getInstance()
+
+        binding = FragmentSignInBinding.bind(view)
+        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_container)
+
         configureGoogleSignIn()
     }
 
@@ -33,7 +46,7 @@ class SignInActivity : AppCompatActivity() {
             .build()
 
         binding.googleSignin.setOnClickListener {
-            val googleSignInClient = GoogleSignIn.getClient(this, gso)
+            val googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
@@ -48,7 +61,7 @@ class SignInActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -58,9 +71,10 @@ class SignInActivity : AppCompatActivity() {
         mAuth.signInWithCredential(credential)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    Toast.makeText(this, "SignIn Successful", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "SignIn Successful", Toast.LENGTH_LONG).show()
+                    navController.navigate(R.id.action_signInFragment_to_profileFragment)
                 } else {
-                    Toast.makeText(this, "SignIn Unsuccessful", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "SignIn Unsuccessful", Toast.LENGTH_LONG).show()
                 }
             }
     }
