@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -18,6 +20,7 @@ class ProfileFragment : Fragment() {
     private lateinit var binding: FragmentProfileBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var navController: NavController
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -31,6 +34,8 @@ class ProfileFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         val user  = auth.currentUser
         firestore = FirebaseFirestore.getInstance()
+
+        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_container)
 
         binding.name.text = user?.displayName
         binding.email.text = user?.email
@@ -55,6 +60,10 @@ class ProfileFragment : Fragment() {
                         }
                     }
             }
+        }
+
+        binding.moveToList.setOnClickListener {
+            navController.navigate(R.id.action_profileFragment_to_listFragment)
         }
 
     }
